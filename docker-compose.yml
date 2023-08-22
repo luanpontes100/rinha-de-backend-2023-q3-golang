@@ -62,6 +62,7 @@ services:
     image: nginx:latest
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /data/nginx/cache:/data/nginx/cache
     depends_on:
       - api01
       - api02
