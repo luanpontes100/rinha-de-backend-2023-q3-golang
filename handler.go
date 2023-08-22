@@ -49,6 +49,7 @@ func (a *App) getPerson(w http.ResponseWriter, r *http.Request) {
 		case "no rows in result set":
 			respondWithError(w, http.StatusNotFound, "Pessoa não encontrada")
 		default:
+			fmt.Println("ERROR IN REQUEST getPerson with ID " + id + ". Error: " + err.Error())
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 		}
 		return
@@ -64,6 +65,7 @@ func (a *App) searchPeople(w http.ResponseWriter, r *http.Request) {
 	}
 	people, err := pessoas{}.searchPeople(a.DB, term)
 	if err != nil {
+		fmt.Println("ERROR IN REQUEST searchPeople with term " + term + ". Error: " + err.Error())
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -74,6 +76,7 @@ func (a *App) searchPeople(w http.ResponseWriter, r *http.Request) {
 func (a *App) getCountPeople(w http.ResponseWriter, r *http.Request) {
 	count, err := pessoas{}.totalPeople(a.DB)
 	if err != nil {
+		fmt.Println("ERROR IN REQUEST getCountPeople. Error: " + err.Error())
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}

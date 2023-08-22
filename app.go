@@ -20,8 +20,8 @@ func (a *App) Initialize(host, user, password, dbname string) {
 	if err != nil {
 		panic(err)
 	}
-	db_config.MaxConns = 300
-	db_config.MinConns = 100
+	db_config.MaxConns = 500
+	db_config.MinConns = 200
 
 	a.DB, err = pgxpool.NewWithConfig(context.Background(), db_config)
 	if err != nil {
