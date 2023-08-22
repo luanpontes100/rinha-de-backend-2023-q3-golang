@@ -20,16 +20,17 @@ type pessoa struct {
 
 type pessoas []pessoa
 
+var re = regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
+
 func (p *pessoa) validateApelido() bool {
 	return len(p.Apelido) > 0 && len(p.Apelido) <= 32
 }
 
 func (p *pessoa) validateNome() bool {
-	return len(p.Apelido) > 0 && len(p.Apelido) <= 100
+	return len(p.Nome) > 0 && len(p.Nome) <= 100
 }
 
 func (p *pessoa) validateNascimento() bool {
-	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
 	return re.MatchString(p.Nascimento)
 }
 
@@ -66,34 +67,34 @@ func (p *pessoa) validate() error {
 }
 
 func (p *pessoa) createPerson(db *pgxpool.Pool) error {
-	err := db.QueryRow(context.Background(), "INSERT INTO pessoas(Apelido, Nome, Nascimento, Stack) VALUES($1, $2, $3, $4) RETURNING id", p.Apelido, p.Nome, p.Nascimento, p.Stack).Scan(&p.Id)
+	err := db.QueryRow(context.Background(), "INSERT INTO pessoas(Apelido, Nome, Nascimento, Stack) VALUES($1, $2, $3, $4) RETURNING id", p.Apelido, p.Nome, p.Nascimento, strings.Join(p.Stack, " | ")).Scan(&p.Id)
 	if err != nil {
-		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
-			err = errors.New("apelido já cadastrado")
-		}
+		err = errors.New("apelido já cadastrado")
 	}
 	return err
 }
 
 func (p *pessoa) getPerson(db *pgxpool.Pool, id string) error {
-	return db.QueryRow(context.Background(), "SELECT ID, Apelido, Nome, Nascimento, Stack FROM pessoas WHERE id=$1", id).Scan(&p.Id, &p.Apelido, &p.Nome, &p.Nascimento, &p.Stack)
+	return db.QueryRow(context.Background(), "SELECT ID, Apelido, Nome, Nascimento, string_to_array(Stack, ' | ') as Stack FROM pessoas WHERE id=$1", id).Scan(&p.Id, &p.Apelido, &p.Nome, &p.Nascimento, &p.Stack)
 }
 
 // Search persons using term on field busca using trgm extension
 func (pessoas) searchPeople(db *pgxpool.Pool, term string) (pessoas, error) {
-	pessoas := make(pessoas, 0)
-	rows, err := db.Query(context.Background(), "SELECT ID, Apelido, Nome, Nascimento, Stack FROM pessoas WHERE busca %> lower(unaccent($1))", term)
+	pessoas := make(pessoas, 50)
+	rows, err := db.Query(context.Background(), "SELECT ID, Apelido, Nome, Nascimento, string_to_array(Stack, ' | ') as stack FROM pessoas WHERE busca ilike '%' || $1 || '%' limit 50", term)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+	var i int
 	for rows.Next() {
 		var p pessoa
 		err = rows.Scan(&p.Id, &p.Apelido, &p.Nome, &p.Nascimento, &p.Stack)
 		if err != nil {
 			return nil, err
 		}
-		pessoas = append(pessoas, p)
+		pessoas[i] = p
+		i++
 	}
 	return pessoas, nil
 }

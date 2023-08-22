@@ -20,8 +20,8 @@ func (a *App) Initialize(host, user, password, dbname string) {
 	if err != nil {
 		panic(err)
 	}
-	db_config.MaxConns = 500
-	db_config.MinConns = 200
+	db_config.MaxConns = 150
+	db_config.MinConns = 100
 
 	a.DB, err = pgxpool.NewWithConfig(context.Background(), db_config)
 	if err != nil {
@@ -34,6 +34,7 @@ func (a *App) Initialize(host, user, password, dbname string) {
 }
 
 func (a *App) Run(port string) {
+	log.Println("Server running on port", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), a.Router))
 }
 
