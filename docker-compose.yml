@@ -15,10 +15,11 @@ services:
       resources:
         limits:
           cpus: '0.4'
-          memory: '1.8GB'
+          memory: '1.6GB'
 
   api01:
-    image: luanpontes100/mura
+    # image: luanpontes100/mura
+    build: .
     hostname: rinha01
     depends_on:
       - db
@@ -38,7 +39,8 @@ services:
           memory: '0.5GB'
 
   api02:
-    image: luanpontes100/mura
+    # image: luanpontes100/mura
+    build: .
     hostname: rinha02
     depends_on:
       - db
@@ -71,7 +73,7 @@ services:
       resources:
         limits:
           cpus: '0.1'
-          memory: '0.2GB'
+          memory: '0.4GB'
 
 networks:
   default:

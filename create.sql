@@ -11,11 +11,11 @@ CREATE TABLE IF NOT EXISTS PESSOAS (
 );
 CREATE INDEX CONCURRENTLY IF NOT EXISTS IDX_BUSCA_TGRM ON PESSOAS USING GIST (BUSCA GIST_TRGM_OPS);
 ALTER SYSTEM
-SET max_connections = '350';
+SET max_connections = '450';
 ALTER SYSTEM
 SET shared_buffers = '600MB';
 ALTER SYSTEM
-SET effective_cache_size = '1536MB';
+SET effective_cache_size = '1300MB';
 ALTER SYSTEM
 SET maintenance_work_mem = '256MB';
 ALTER SYSTEM
