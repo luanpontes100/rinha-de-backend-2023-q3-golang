@@ -2,6 +2,7 @@ version: '3.5'
 services:
   db:
     image: postgres:15
+    command: postgres -c 'max_connections=450'
     environment:
       - POSTGRES_PASSWORD=admin
       - POSTGRES_USER=admin
@@ -12,7 +13,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.4'
+          cpus: '0.8'
           memory: '1.6GB'
 
   api01:
@@ -31,7 +32,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: '0.3'
           memory: '0.5GB'
 
   api02:
@@ -50,7 +51,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: '0.3'
           memory: '0.5GB'
 
   nginx:

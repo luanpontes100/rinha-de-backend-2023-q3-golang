@@ -20,7 +20,7 @@ func (a *App) Initialize(host, user, password, dbname string) {
 	if err != nil {
 		panic(err)
 	}
-	db_config.MaxConns = 150
+	db_config.MaxConns = 200 // hardcoded, check pg's max_connection. must be half of that per instance
 	db_config.MinConns = 100
 
 	a.DB, err = pgxpool.NewWithConfig(context.Background(), db_config)
