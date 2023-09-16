@@ -8,8 +8,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func respondWithError(w http.ResponseWriter, code int, message string) {
-	respondWithJSON(w, code, map[string]string{"error": message})
+func respondWithError(w http.ResponseWriter, code int) {
+	w.WriteHeader(code)
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
@@ -24,16 +24,16 @@ func (a *App) createPerson(w http.ResponseWriter, r *http.Request) {
 	var p pessoa
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&p); err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid request payload: %v", err))
+		respondWithError(w, http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
 	if err := p.validate(); err != nil {
-		respondWithError(w, http.StatusUnprocessableEntity, err.Error())
+		respondWithError(w, http.StatusUnprocessableEntity)
 		return
 	}
 	if err := p.createPerson(a.DB); err != nil {
-		respondWithError(w, http.StatusUnprocessableEntity, err.Error())
+		respondWithError(w, http.StatusUnprocessableEntity)
 		return
 	}
 	w.Header().Set("Location", fmt.Sprintf("/pessoas/%s", p.Id.String()))
@@ -47,10 +47,10 @@ func (a *App) getPerson(w http.ResponseWriter, r *http.Request) {
 	if err := p.getPerson(a.DB, id); err != nil {
 		switch err.Error() {
 		case "no rows in result set":
-			respondWithError(w, http.StatusNotFound, "Pessoa não encontrada")
+			respondWithError(w, http.StatusNotFound)
 		default:
-			fmt.Println("ERROR IN REQUEST getPerson with ID " + id + ". Error: " + err.Error())
-			respondWithError(w, http.StatusInternalServerError, err.Error())
+			// fmt.Println("ERROR IN REQUEST getPerson with ID " + id + ". Error: " + err.Error())
+			respondWithError(w, http.StatusInternalServerError)
 		}
 		return
 	}
@@ -60,13 +60,13 @@ func (a *App) getPerson(w http.ResponseWriter, r *http.Request) {
 func (a *App) searchPeople(w http.ResponseWriter, r *http.Request) {
 	term := r.URL.Query().Get("t")
 	if len(term) == 0 {
-		respondWithError(w, http.StatusBadRequest, "Termo de busca não informado")
+		respondWithError(w, http.StatusBadRequest)
 		return
 	}
 	people, err := pessoas{}.searchPeople(a.DB, term)
 	if err != nil {
-		fmt.Println("ERROR IN REQUEST searchPeople with term " + term + ". Error: " + err.Error())
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		// fmt.Println("ERROR IN REQUEST searchPeople with term " + term + ". Error: " + err.Error())
+		respondWithError(w, http.StatusInternalServerError)
 		return
 	}
 
@@ -76,8 +76,8 @@ func (a *App) searchPeople(w http.ResponseWriter, r *http.Request) {
 func (a *App) getCountPeople(w http.ResponseWriter, r *http.Request) {
 	count, err := pessoas{}.totalPeople(a.DB)
 	if err != nil {
-		fmt.Println("ERROR IN REQUEST getCountPeople. Error: " + err.Error())
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		// fmt.Println("ERROR IN REQUEST getCountPeople. Error: " + err.Error())
+		respondWithError(w, http.StatusInternalServerError)
 		return
 	}
 	fmt.Fprintf(w, "%d", count)
